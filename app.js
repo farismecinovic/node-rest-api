@@ -2,7 +2,8 @@ const express = require('express');
 const app = express();
 const morgan = require('morgan');
 const mongoose = require('mongoose');
-
+const swaggerUi = require('swagger-ui-express');
+const swaggerJsdoc = require('swagger-jsdoc');
 const productRoutes = require('./api/routes/products');
 const ordersRoutes = require('./api/routes/orders');
 const userRoutes = require('./api/routes/user');
@@ -11,6 +12,26 @@ mongoose.connect(
   `mongodb+srv://restapi:${process.env.MONGO_ATLAS_PW}@cluster0.yavof.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`
 );
 
+const options = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'My First Node-Express REST API with Swagger',
+      version: '0.1.0',
+      description:
+        'This is a simple CRUD API application made with Express and documented with Swagger',
+    },
+    servers: [
+      {
+        url: 'http://localhost:3050',
+      },
+    ],
+  },
+  apis: ['./api/routes/orders.js', './routes/products.js', './routes/user.js'],
+};
+
+const specs = swaggerJsdoc(options);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 app.use(morgan('dev'));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
