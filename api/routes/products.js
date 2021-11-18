@@ -1,105 +1,22 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
+const checkAuth = require('../middleware/check-auth');
 const Product = require('../models/product');
+const ProductsController = require('../controllers/products');
 
-router.get('/', (req, res, next) => {
-  Product.find()
-    .select('name price _id')
-    .exec()
-    .then((docs) => {
-      const response = {
-        count: docs.length,
-        products: docs,
-      };
-      res.status(200).json(response);
-    })
-    .catch((err) => {
-      console.log(err);
-      res.status(500).json({
-        error: err,
-      });
-    });
-});
+router.get('/', ProductsController.products_get_all);
 
-router.post('/', (req, res, next) => {
-  const product = new Product({
-    _id: new mongoose.Types.ObjectId(),
-    name: req.body.name,
-    price: req.body.price,
-  });
-  product
-    .save()
-    .then((result) => {
-      console.log(result);
-      res.status(201).json({
-        message: 'Handling POST requests to /products',
-        createdProduct: result,
-      });
-    })
-    .catch((err) => {
-      console.log(err);
-      res.status(500).json({ error: err });
-    });
-});
+router.post('/', checkAuth, ProductsController.products_create_product);
 
-router.get('/:id', (req, res, next) => {
-  const id = req.params.id;
-  Product.findById(id)
-    .exec()
-    .then((doc) => {
-      console.log(doc);
-      if (doc) {
-        res.status(200).json(doc);
-      } else {
-        res
-          .status(404)
-          .json({ message: 'No valid entry found for provided ID' });
-      }
-    })
-    .catch((err) => {
-      console.log(err);
-      res.status(500).json({ error: err });
-    });
-});
+router.get('/:productId', ProductsController.products_get_product);
 
-router.patch('/:id', (req, res, next) => {
-  const id = req.params.id;
-  const updateOps = {};
-  for (const ops of req.body) {
-    updateOps[ops.propName] = ops.value;
-  }
-  Product.updateOne(
-    { _id: id },
-    {
-      $set: updateOps,
-    }
-  )
-    .exec()
-    .then((result) => {
-      console.log(result);
-      res.status(200).json(result);
-    })
-    .catch((err) => {
-      console.log(err);
-      res.status(500).json({
-        error: err,
-      });
-    });
-});
+router.patch(
+  '/:productId',
+  checkAuth,
+  ProductsController.products_update_product
+);
 
-router.delete('/:id', (req, res, next) => {
-  const id = req.params.id;
-  Product.remove({ _id: id })
-    .exec()
-    .then((result) => {
-      res.status(200).json(result);
-    })
-    .catch((err) => {
-      console.log(err);
-      res.status(500).json({
-        error: err,
-      });
-    });
-});
+router.delete('/:productId', checkAuth, ProductsController.products_delete);
+
 module.exports = router;
