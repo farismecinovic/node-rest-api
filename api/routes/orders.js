@@ -1,14 +1,14 @@
-const express = require("express");
-const mongoose = require("mongoose");
-
-const Order = require("../models/order");
-const Product = require("../models/product");
-
+const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 
-router.get("/", (req, res, next) => {
+const Order = require('../models/order');
+const Product = require('../models/product');
+
+router.get('/', (req, res, next) => {
   Order.find()
-    .select("product _id quantity")
+    .select('product _id quantity')
+    .populate('product', 'name')
     .exec()
     .then((docs) =>
       res.status(200).json({
@@ -19,8 +19,8 @@ router.get("/", (req, res, next) => {
             product: doc.product,
             quantity: doc.quantity,
             request: {
-              type: "GET",
-              url: "http://localhost:3050/orders/" + doc._id,
+              type: 'GET',
+              url: 'http://localhost:3050/orders/' + doc._id,
             },
           };
         }),
@@ -33,10 +33,10 @@ router.get("/", (req, res, next) => {
     );
 });
 
-router.post("/", (req, res, next) => {
+router.post('/', (req, res, next) => {
   Product.findById(req.body.productId)
     .then((product) => {
-      !product && res.status(404).json({ message: "Product not found" });
+      !product && res.status(404).json({ message: 'Product not found' });
       const order = new Order({
         _id: mongoose.Types.ObjectId(),
         quantity: req.body.quantity,
@@ -47,7 +47,7 @@ router.post("/", (req, res, next) => {
     .then((result) => {
       console.log(result);
       res.status(201).json({
-        message: "Order stored!",
+        message: 'Order stored!',
       });
     })
     .catch((err) => {
@@ -58,15 +58,15 @@ router.post("/", (req, res, next) => {
     });
 });
 
-router.get("/:id", (req, res, next) => {
+router.get('/:id', (req, res, next) => {
   Order.findById(req.params.id)
     .exec()
     .then((order) => {
       res.status(200).json({
         order: order,
         request: {
-          type: "GET",
-          url: "http://localhost:3050/orders",
+          type: 'GET',
+          url: 'http://localhost:3050/orders',
         },
       });
     })
@@ -77,17 +77,17 @@ router.get("/:id", (req, res, next) => {
     });
 });
 
-router.delete("/:id", (req, res, next) => {
+router.delete('/:id', (req, res, next) => {
   Order.deleteOne({ _id: req.params.id })
     .exec()
     .then((result) => {
       if (!result) {
         return res.status(404).json({
-          message: "Order not found",
+          message: 'Order not found',
         });
       }
       res.status(200).json({
-        message: "DELETED!",
+        message: 'DELETED!',
       });
     })
     .catch((err) => res.status(500).json({ message: err }));

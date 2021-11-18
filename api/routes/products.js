@@ -1,11 +1,11 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const mongoose = require("mongoose");
-const Product = require("../models/product");
+const mongoose = require('mongoose');
+const Product = require('../models/product');
 
-router.get("/", (req, res, next) => {
+router.get('/', (req, res, next) => {
   Product.find()
-    .select("name price _id")
+    .select('name price _id')
     .exec()
     .then((docs) => {
       const response = {
@@ -22,7 +22,7 @@ router.get("/", (req, res, next) => {
     });
 });
 
-router.post("/", (req, res, next) => {
+router.post('/', (req, res, next) => {
   const product = new Product({
     _id: new mongoose.Types.ObjectId(),
     name: req.body.name,
@@ -33,7 +33,7 @@ router.post("/", (req, res, next) => {
     .then((result) => {
       console.log(result);
       res.status(201).json({
-        message: "Handling POST requests to /products",
+        message: 'Handling POST requests to /products',
         createdProduct: result,
       });
     })
@@ -43,7 +43,7 @@ router.post("/", (req, res, next) => {
     });
 });
 
-router.get("/:id", (req, res, next) => {
+router.get('/:id', (req, res, next) => {
   const id = req.params.id;
   Product.findById(id)
     .exec()
@@ -54,7 +54,7 @@ router.get("/:id", (req, res, next) => {
       } else {
         res
           .status(404)
-          .json({ message: "No valid entry found for provided ID" });
+          .json({ message: 'No valid entry found for provided ID' });
       }
     })
     .catch((err) => {
@@ -63,7 +63,7 @@ router.get("/:id", (req, res, next) => {
     });
 });
 
-router.patch("/:id", (req, res, next) => {
+router.patch('/:id', (req, res, next) => {
   const id = req.params.id;
   const updateOps = {};
   for (const ops of req.body) {
@@ -88,7 +88,7 @@ router.patch("/:id", (req, res, next) => {
     });
 });
 
-router.delete("/:id", (req, res, next) => {
+router.delete('/:id', (req, res, next) => {
   const id = req.params.id;
   Product.remove({ _id: id })
     .exec()
